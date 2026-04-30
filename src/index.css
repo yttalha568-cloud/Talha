@@ -1,0 +1,39 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+Arabic:wght@400;500;600;700&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", "Noto Sans Arabic", ui-sans-serif, system-ui, sans-serif;
+  --color-brand-primary: #2D6A4F;
+  --color-brand-secondary: #1B4332;
+  --color-brand-accent: #D4A373;
+  --color-brand-light: #E9EDC9;
+  --color-brand-earth: #6C584C;
+  --color-brand-border: #CCD5AE;
+  --color-background: #F8F9F1;
+}
+
+body {
+  background-color: var(--color-background);
+  color: var(--color-brand-secondary);
+}
+
+.urdu-text {
+  font-family: "Noto Sans Arabic", sans-serif;
+  direction: rtl;
+}
+
+/* Updated app-card for Natural Tones */
+.app-card {
+  @apply bg-white rounded-3xl shadow-sm border border-[--color-brand-border] p-5 transition-all hover:shadow-md;
+}
+
+/* Bottom Nav Styling */
+.bottom-nav {
+  @apply bg-white border-t border-slate-100 fixed bottom-0 left-0 right-0 z-50 h-20;
+}
+
+/* Header Styling */
+.app-header {
+  @apply bg-brand-primary text-white sticky top-0 z-50 h-20 pt-4 flex items-center;
+}
+

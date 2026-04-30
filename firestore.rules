@@ -1,0 +1,101 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // 0. Global Safety Net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // --- Helpers ---
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    // --- Validation Blueprints ---
+
+    function isValidCropListing(data) {
+      return data.keys().hasAll(['userId', 'cropType', 'quantity', 'unit', 'price', 'contact', 'createdAt'])
+        && data.keys().size() <= 9
+        && data.userId == request.auth.uid
+        && data.cropType is string && data.cropType.size() <= 50
+        && data.quantity is number && data.quantity > 0
+        && data.unit is string && data.unit.size() <= 20
+        && data.price is number && data.price > 0
+        && data.contact is string && data.contact.size() >= 10 && data.contact.size() <= 15
+        && data.createdAt == request.time;
+    }
+
+    function isValidUser(data) {
+      return data.keys().hasAll(['displayName', 'phoneNumber'])
+        && data.keys().size() <= 5
+        && data.displayName is string && data.displayName.size() <= 100
+        && data.phoneNumber is string && data.phoneNumber.size() <= 20;
+    }
+
+    // --- Collection Rules ---
+
+    match /cropListings/{listingId} {
+      // Public marketplace: Anyone signed in can read
+      // But only verified users should list (standard requirement)
+      allow read: if isSignedIn();
+      
+      allow create: if isSignedIn() 
+        && isValidId(listingId)
+        && isValidCropListing(incoming());
+
+      allow update: if isOwner(existing().userId)
+        && isValidCropListing(incoming())
+        && incoming().userId == existing().userId
+        && incoming().createdAt == existing().createdAt
+        && (
+          // Action: Edit details
+          incoming().diff(existing()).affectedKeys().hasOnly(['cropType', 'quantity', 'unit', 'price', 'contact', 'farmerName', 'location'])
+        );
+
+      allow delete: if isOwner(existing().userId);
+    }
+
+    match /users/{userId} {
+      allow read: if isSignedIn();
+      allow write: if isOwner(userId) && isValidUser(incoming());
+    }
+
+    match /chats/{chatId} {
+      function isChatParticipant(participants) {
+        return isSignedIn() && request.auth.uid in participants;
+      }
+
+      allow read: if isChatParticipant(existing().participants);
+      allow create: if isSignedIn() 
+        && incoming().participants.size() == 2
+        && request.auth.uid in incoming().participants;
+      
+      allow update: if isChatParticipant(existing().participants)
+        && incoming().participants == existing().participants
+        && incoming().updatedAt == request.time;
+
+      match /messages/{messageId} {
+        allow read: if isChatParticipant(get(/databases/$(database)/documents/chats/$(chatId)).data.participants);
+        allow create: if isChatParticipant(get(/databases/$(database)/documents/chats/$(chatId)).data.participants)
+          && incoming().senderId == request.auth.uid
+          && incoming().timestamp == request.time;
+      }
+    }
+  }
+}

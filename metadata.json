@@ -1,0 +1,14 @@
+{
+  "name": "Farmers Helper Pakistan",
+  "description": "A comprehensive agriculture app for Pakistani farmers with Urdu/English support, AI disease detection, live mandi prices, a crop marketplace for trading harvests, and government schemes.",
+  "requestFramePermissions": [
+    "camera",
+    "geolocation"
+  ],
+  "majorCapabilities": [
+    "AI-powered disease detection",
+    "Real-time mandi prices & Crop Marketplace",
+    "Government schemes database",
+    "Multilingual support (Urdu/English)"
+  ]
+}

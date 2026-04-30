@@ -1,0 +1,73 @@
+{
+  "entities": {
+    "CropListing": {
+      "title": "Crop Listing",
+      "description": "A crop listing posted by a farmer for sale.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "description": "The UID of the farmer who posted the listing." },
+        "farmerName": { "type": "string", "description": "Display name of the farmer." },
+        "cropType": { "type": "string", "description": "Type of crop (e.g., Wheat, Cotton)." },
+        "quantity": { "type": "number", "description": "Quantity available." },
+        "unit": { "type": "string", "description": "Unit of measurement (e.g., Maund, KG)." },
+        "price": { "type": "number", "description": "Expected price per unit." },
+        "location": { "type": "string", "description": "City or Village location." },
+        "contact": { "type": "string", "description": "Contact phone number." },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Timestamp of creation." }
+      },
+      "required": ["userId", "cropType", "quantity", "unit", "price", "contact", "createdAt"]
+    },
+    "User": {
+      "title": "User Profile",
+      "description": "Extended user profile data.",
+      "type": "object",
+      "properties": {
+        "displayName": { "type": "string" },
+        "phoneNumber": { "type": "string" },
+        "location": { "type": "string" }
+      },
+      "required": ["displayName", "phoneNumber"]
+    },
+    "Chat": {
+      "title": "Chat Session",
+      "description": "A conversation between two users.",
+      "type": "object",
+      "properties": {
+        "participants": { "type": "array", "items": { "type": "string" } },
+        "lastMessage": { "type": "string" },
+        "updatedAt": { "type": "string", "format": "date-time" },
+        "listingId": { "type": "string" }
+      },
+      "required": ["participants", "updatedAt"]
+    },
+    "Message": {
+      "title": "Message",
+      "description": "An individual message in a chat.",
+      "type": "object",
+      "properties": {
+        "senderId": { "type": "string" },
+        "text": { "type": "string" },
+        "timestamp": { "type": "string", "format": "date-time" }
+      },
+      "required": ["senderId", "text", "timestamp"]
+    }
+  },
+  "firestore": {
+    "/cropListings/{listingId}": {
+      "schema": "CropListing",
+      "description": "Public marketplace listings for crops."
+    },
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "User profile data."
+    },
+    "/chats/{chatId}": {
+      "schema": "Chat",
+      "description": "P2P chat sessions."
+    },
+    "/chats/{chatId}/messages/{messageId}": {
+      "schema": "Message",
+      "description": "Messages within a chat."
+    }
+  }
+}
